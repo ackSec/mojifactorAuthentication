@@ -1,0 +1,54 @@
+import cv2
+import boto3
+
+# Define a dictionary of emotions and their corresponding emojis
+emoji_map = {
+    'HAPPY': '😀',
+    'SAD': '😔',
+    'ANGRY': '😠',
+    'CONFUSED': '😕',
+    'DISGUSTED': '🤢',
+    'SURPRISED': '😲',
+    'CALM': '😌',
+    'FEAR': '😨'
+}
+
+# Initialize the OpenCV video capture object
+cap = cv2.VideoCapture(0)
+
+# Create a Rekognition client
+rekognition = boto3.client('rekognition')
+
+# Loop indefinitely
+while True:
+    # Read a frame from the video stream
+    ret, frame = cap.read()
+
+    # Convert the frame to JPEG format
+    ret, buffer = cv2.imencode('.jpg', frame)
+    image_bytes = buffer.tobytes()
+
+    # Call the Rekognition detect_faces API
+    response = rekognition.detect_faces(
+        Image={'Bytes': image_bytes},
+        Attributes=['ALL']
+    )
+
+    # Print the strongest emotion for each face
+    for face_detail in response['FaceDetails']:
+        emotions = {}
+        for emotion in face_detail['Emotions']:
+            emotions[emotion['Type']] = emotion['Confidence']
+        strongest_emotion = max(emotions, key=emotions.get)
+        print('Strongest emotion:', emoji_map.get(strongest_emotion, ''))
+
+    # Display the video stream in a window
+    cv2.imshow('Video Stream', frame)
+
+    # Exit if the user presses the 'q' key
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release the OpenCV video capture object and close all windows
+cap.release()
+cv2.destroyAllWindows()
