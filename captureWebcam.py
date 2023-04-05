@@ -1,7 +1,5 @@
 import cv2
 import boto3
-import os 
-import sys
 from emojiMap import emoji_map
 
 # Create a Rekognition client
@@ -25,16 +23,18 @@ while True:
         Attributes=['ALL']
     )
 
-    # Add the detected emotions to the emotions_list
-    emotions_list = []
+    # Get the strongest emotion
+    emotions = []
     for face_detail in response['FaceDetails']:
         for emotion in face_detail['Emotions']:
-            emotions_list.append(emotion['Type'])
+            emotions.append((emotion['Type'], emotion['Confidence']))
+    emotions.sort(key=lambda x: x[1], reverse=True)
+    strongest_emotion = emotions[0][0] if len(emotions) > 0 else None
 
-    # Display the detected emotions as emojis
-    if len(emotions_list) > 0:
-        emojis = [emoji_map.get(emotion, '') for emotion in emotions_list]
-        print('Emotions:', ' '.join(emojis))
+    # Display the detected emotion as an emoji
+    if strongest_emotion is not None:
+        emoji = emoji_map.get(strongest_emotion, '')
+        print('Emotion:', emoji)
 
     # Display the video stream in a window
     cv2.imshow('Video Stream', frame)
