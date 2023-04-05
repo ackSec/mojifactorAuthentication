@@ -53,6 +53,10 @@ while True:
     # Authenticate if there is a match
     if len(matches) > 0 and matches[0].distance < 50:
         authenticated = True
+        
+        # Capture the frame upon authentication and save it to the running directory
+        cv2.imwrite('authenticated.jpg', frame)
+        
         break
 
     # Listen for keyboard events
