@@ -2,18 +2,7 @@ import cv2
 import boto3
 import os 
 import sys
-
-# Define a dictionary of emotions and their corresponding emojis
-emoji_map = {
-    'HAPPY': '😀',
-    'SAD': '😔',
-    'ANGRY': '😠',
-    'CONFUSED': '😕',
-    'DISGUSTED': '🤢',
-    'SURPRISED': '😲',
-    'CALM': '😌',
-    'FEAR': '😨'
-}
+from emojiMap import emoji_map
 
 # Create a Rekognition client
 rekognition = boto3.client('rekognition')
