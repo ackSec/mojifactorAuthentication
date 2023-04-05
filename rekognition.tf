@@ -43,5 +43,5 @@ resource "aws_kinesis_video_stream_processor" "example_processor" {
       face_detection_model_version = "2.0"
       face_search_threshold        = 90
     }
-    emotion_detection {
-      model_name =
+  }
+}
