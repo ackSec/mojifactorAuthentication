@@ -1,3 +1,7 @@
+# This takes an image from an S3 bucket and authenticates it to the person on the webcam
+#
+#
+
 import cv2
 import boto3
 

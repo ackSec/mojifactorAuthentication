@@ -1,7 +1,11 @@
 #import authenticateFace
-import captureWebcam
 import cv2
 import emojiAuthentication
+from authenticateFace import authenticate_face
+
+# Call the authenticate_face function
+authenticate_face()
+
 
 # Authenticate the user
 if authenticateFace.authenticated:
