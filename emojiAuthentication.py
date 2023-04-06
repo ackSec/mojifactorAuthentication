@@ -25,15 +25,18 @@ class EmojiWindow:
         # Get four random emojis from the EMOJI_MAP
         emojis = random.sample(list(emoji_map.values()), 4)
 
-    # Set the label text to the four selected emojis, separated by spaces
+        # Set the label text to the four selected emojis, separated by spaces
         self.label.config(text=" ".join(emojis))
 
-    # Call the display_new_emoji() function again in 3 seconds
+        # Call the display_new_emoji() function again in 3 seconds
         self.root.after(3000, self.display_new_emoji)
         
     def close_window(self, event):
         # Close the window when the 'q' key is pressed
         self.root.destroy()
 
-if __name__ == "__main__":
+def show_random_emoji():
     EmojiWindow()
+
+if __name__ == "__main__":
+    show_random_emoji()

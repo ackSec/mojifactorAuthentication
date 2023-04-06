@@ -1,0 +1,12 @@
+boto3==1.18.63
+botocore==1.21.63
+certifi==2021.10.8
+matplotlib==3.4.3
+numpy==1.21.4
+opencv-python-headless==4.5.4.58
+Pillow==8.4.0
+python-dateutil==2.8.2
+s3transfer==0.5.0
+scipy==1.7.3
+six==1.16.0
+tk==0.1.0

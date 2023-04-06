@@ -2,11 +2,14 @@ import authenticateFace
 import captureWebcam
 import cv2
 import emojiAuthentication
+import matplotlib
+matplotlib.use('TkAgg')
+
 
 # Authenticate the user
-if authenticateFace.authenticate_user():
-    # Show a window with random emojis
-    emoji_auth = emojiAuthentication.EmojiWindow()
+if authenticateFace.authenticated:
+    # Show random emojis
+    emojiAuthentication.show_random_emoji()
 
     # Start capturing webcam data and detecting emotions
     while True:
