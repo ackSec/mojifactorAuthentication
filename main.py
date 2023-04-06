@@ -5,8 +5,10 @@ import emojiAuthentication
 
 # Authenticate the user
 if authenticateFace.authenticate_user():
-    # Start capturing webcam data and detecting emotions
+    # Show random emojis
     emojiAuthentication.show_random_emoji()
+
+    # Start capturing webcam data and detecting emotions
     while True:
         if cv2.waitKey(1) & 0xFF == ord('q'): # Exit the program on 'q' key press
             break
