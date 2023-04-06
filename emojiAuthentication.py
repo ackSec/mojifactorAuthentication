@@ -1,6 +1,10 @@
+# This displays random emojis to use for the authentication process
+# Does NOT play well with main.py, not sure why. Think it conflicts with opencv
+#
+
 import tkinter as tk
 import random
-from emojiMap import emoji_map
+from common.emojiMap import emoji_map
 
 class EmojiWindow:
     def __init__(self):

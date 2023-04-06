@@ -1,5 +1,9 @@
+# This detects emojis from pictures you upload
+# Save the picture to the root directory as upload.jpg
+#
+
 import boto3
-from emojiMap import emoji_map
+from common.emojiMap import emoji_map
 
 # Initialize the Amazon Rekognition client
 rekognition = boto3.client('rekognition')
