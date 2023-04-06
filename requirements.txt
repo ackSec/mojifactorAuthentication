@@ -1,7 +1,7 @@
 boto3==1.18.63
 botocore==1.21.63
 certifi==2021.10.8
-matplotlib==3.4.3
+matplotlib==3.5.1
 numpy==1.21.4
 opencv-python-headless==4.5.4.58
 Pillow==8.4.0

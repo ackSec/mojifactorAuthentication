@@ -1,75 +1,60 @@
-import boto3
 import cv2
-import numpy as np
+import boto3
 
-# Initialize the Amazon Rekognition client
+s3 = boto3.client('s3')
 rekognition = boto3.client('rekognition')
 
-# Initialize the OpenCV video capture object
-cap = cv2.VideoCapture(0)
+bucket_name = 'faces-emojifactor'
+object_key = 'target.jpg'
 
-# Take the user's name as input
-name = input('Please enter your name: ')
 
-# Load the target image for authentication
-target_image = cv2.imread('target.jpg')
+with open('target.jpg', 'wb') as f:
+    s3.download_fileobj(bucket_name, object_key, f)
 
-# Convert the target image to grayscale
-target_gray = cv2.cvtColor(target_image, cv2.COLOR_BGR2GRAY)
 
-# Detect the keypoints and descriptors in the target image using ORB
-orb = cv2.ORB_create()
-kp1, des1 = orb.detectAndCompute(target_gray, None)
+with open('target.jpg', 'rb') as f:
+    target_image_bytes = f.read()
 
-# Initialize the flag for authentication
-authenticated = False
 
-# Loop indefinitely
+video_capture = cv2.VideoCapture(0)
+
 while True:
-    # Read a frame from the video stream
-    ret, frame = cap.read()
+    # Capture a frame from the video stream
+    ret, frame = video_capture.read()
 
-    # Convert the frame to grayscale
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Detect faces in the frame using Rekognition
+    response = rekognition.detect_faces(
+        Image={
+            'Bytes': cv2.imencode('.jpg', frame)[1].tobytes()
+        }
+    )
 
-    # Detect the keypoints and descriptors in the current frame using ORB
-    kp2, des2 = orb.detectAndCompute(gray, None)
+    # Check if any face is detected
+    if len(response['FaceDetails']) > 0:
+        # Compare the detected face with the target image using Rekognition
+        compare_response = rekognition.compare_faces(
+            SourceImage={
+                'Bytes': target_image_bytes
+            },
+            TargetImage={
+                'Bytes': cv2.imencode('.jpg', frame)[1].tobytes()
+            }
+        )
 
-    # Initialize the BFMatcher
-    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        # Check if the detected face matches the target image
+        if len(compare_response['FaceMatches']) > 0:
+            print('Match found!')
+            # TODO: Add shtuff here 
+        else:
+            print('No match found')
 
-    # Match the descriptors of the target image and the current frame
-    matches = bf.match(des1, des2)
+    # Display the resulting frame
+    cv2.imshow('Video', frame)
 
-    # Sort the matches by distance
-    matches = sorted(matches, key=lambda x: x.distance)
-
-    # Draw the top 10 matches on the current frame
-    img_matches = cv2.drawMatches(target_gray, kp1, gray, kp2, matches[:10], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-
-    # Display the video stream in a window
-    cv2.imshow('Video Stream', img_matches)
-
-    # Authenticate if there is a match
-    if len(matches) > 0 and matches[0].distance < 50:
-        authenticated = True
-        
-        # Capture the frame upon authentication and save it to the running directory
-        cv2.imwrite('authenticated.jpg', frame)
-        
+    # Check if the user wants to quit
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    # Listen for keyboard events
-    key = cv2.waitKey(1)
-    if key == ord('q'):  # Quit the program on 'q' key press
-        break
-
-# Release the OpenCV video capture object and close all windows
-cap.release()
+# Release the video capture and close all windows
+video_capture.release()
 cv2.destroyAllWindows()
-
-# Print authentication result
-if authenticated:
-    print('Authenticated as', name)
-else:
-    print('Authentication failed')
