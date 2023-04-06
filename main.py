@@ -5,8 +5,8 @@ import emojiAuthentication
 
 # Authenticate the user
 if authenticateFace.authenticate_user():
-    # Show random emojis
-    emojiAuthentication.show_random_emoji()
+    # Show a window with random emojis
+    emoji_auth = emojiAuthentication.EmojiWindow()
 
     # Start capturing webcam data and detecting emotions
     while True:
