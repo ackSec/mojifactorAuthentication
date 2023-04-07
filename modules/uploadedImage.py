@@ -1,15 +1,23 @@
-# This detects emojis from pictures you upload
-# Save the picture to the root directory as upload.jpg
-#
-
+import os
 import boto3
 from common.emojiMap import emoji_map
 
 # Initialize the Amazon Rekognition client
 rekognition = boto3.client('rekognition')
 
+# Find the upload file in the root directory
+upload_file = None
+for filename in os.listdir('.'):
+    if filename.startswith('upload.'):
+        upload_file = filename
+        break
+
+if upload_file is None:
+    print('Could not find an upload file')
+    exit(1)
+
 # Load the target image
-with open('upload.jpg', 'rb') as f:
+with open(upload_file, 'rb') as f:
     target_bytes = f.read()
 
 # Call the Rekognition detect_faces API
