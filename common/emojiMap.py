@@ -3,7 +3,7 @@ emoji_map = {
     'HAPPY': '😀',
     'SAD': '😔',
     'ANGRY': '😠',
-    'CONFUSED': '😕',
+    'CONFUSED': '🤔',
     'DISGUSTED': '🤢',
     'SURPRISED': '😲',
     'CALM': '😌',

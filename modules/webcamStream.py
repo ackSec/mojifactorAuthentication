@@ -1,5 +1,6 @@
 import cv2
 from common.detectEmotions import detect_emotion
+from common.emojiMap import emoji_map
 
 # Initialize the video capture
 video_capture = cv2.VideoCapture(0)
