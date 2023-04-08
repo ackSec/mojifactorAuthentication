@@ -1,3 +1,6 @@
+# this is if we want to train more images into rekognition
+# this was my training code
+
 import boto3
 import csv
 
