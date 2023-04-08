@@ -1,28 +1,39 @@
 import cv2
+import time
 from common.detectEmotions import detect_emotion
+from common.emojiMap import emoji_map
 
-# Initialize the video capture
-video_capture = cv2.VideoCapture(0)
+def display_countdown(countdown_seconds):
+    for i in range(countdown_seconds, 0, -1):
+        print(f"Capturing in {i} seconds...")
+        time.sleep(1)
 
-while True:
-    # Capture a frame from the video stream
+def runner():
+    video_capture = cv2.VideoCapture(0)
+
+    if not video_capture.isOpened():
+        print("Error: Unable to open camera.")
+        exit()
+
+    time.sleep(2)  # Wait for 2 seconds to allow the camera to adjust
+
+    ret, frame = video_capture.read()
+
+    display_countdown(5)
+
+    # Capture a frame after the countdown
     ret, frame = video_capture.read()
 
     # Detect the emotion from the frame
     emotion = detect_emotion(cv2.imencode('.jpg', frame)[1].tobytes())
 
-    # Display the resulting frame
-    cv2.imshow('Video', frame)
-
-    # Check if an emotion is detected
     if emotion is not None:
-        # Print the detected emotion to the console
         print(f'Detected emotion: {emotion}')
+        print(f'Corresponding emoji: {emoji_map.get(emotion, "❓")}')
+    else:
+        print('No emotion detected')
 
-    # Check if the user wants to quit
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# Release the video capture and close all windows
-video_capture.release()
-cv2.destroyAllWindows()
+    video_capture.release()
+    cv2.destroyAllWindows()
+    
+    return emotion
