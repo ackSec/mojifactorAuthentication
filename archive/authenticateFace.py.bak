@@ -1,3 +1,8 @@
+# This pulls all images from the mojifactor S3 bucket as authorized users
+# it captures a frame from the webcam and compares it against all authorized users
+# if a user exists in the bucket, they are authenticated.
+#
+
 import cv2
 import boto3
 import time
@@ -40,23 +45,22 @@ def compare_frame_to_images(frame, images):
 
     return None
 
-def runner():
-    target_images = download_images_from_s3()
-    video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(0)
 
-    if not video_capture.isOpened():
-        print("Error: Unable to open camera.")
-        exit()
+if not video_capture.isOpened():
+    print("Error: Unable to open camera.")
+    exit()
 
-    time.sleep(1)  # Wait for 1 second to allow the camera to adjust
+time.sleep(1)  # Wait for 1 second to allow the camera to adjust
 
-    ret, frame = video_capture.read()
+ret, frame = video_capture.read()
 
-    recognized_name = compare_frame_to_images(frame, target_images)
+target_images = download_images_from_s3()
+recognized_name = compare_frame_to_images(frame, target_images)
 
-    if recognized_name:
-        print(f"Welcome, {recognized_name}")
-    else:
-        print("Sorry, I don't know you")
+if recognized_name:
+    print(f"Welcome, {recognized_name}")
+else:
+    print("Sorry, I don't know you")
 
-    video_capture.release()
+video_capture.release()

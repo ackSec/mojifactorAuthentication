@@ -1,3 +1,6 @@
+#This is if we want to create a pipeline for image data. Not in use currently
+#
+
 import boto3
 
 # Create a Kinesis Video Streams client
