@@ -1,24 +1,29 @@
-#import authenticateFace
-import cv2
-import emojiAuthentication
-from authenticateFace import authenticate_face
+import authenticateFace as af
+import common.emojiGenerator as eg
+from modules.frameCapture import runner
+from urllib.request import urlopen
 
-# Call the authenticate_face function
-authenticate_face()
-
+def get_insult():
+    url = "https://evilinsult.com/generate_insult.php"
+    try:
+        response = urlopen(url)
+        return response.read().decode()
+    except Exception as e:
+        return "An error occurred while fetching insult: " + str(e)
 
 # Authenticate the user
-if authenticateFace.authenticated:
-    # Show random emojis
-    #emojiAuthentication.show_random_emoji()
+af.runner()
 
-    # Start capturing webcam data and detecting emotions
-    while True:
-        if cv2.waitKey(1) & 0xFF == ord('q'): # Exit the program on 'q' key press
-            break
-        captureWebcam.detect_emotions_from_webcam()
-#else:
-    print('Authentication failed')
+# Generate a random emoji
+random_emoji = eg.generate_random_emoji()
+print(f"Please make this face to authenticate yourself: {random_emoji}")
 
-# Release the OpenCV video capture object and close all windows
-cv2.destroyAllWindows()
+# Detect the user's emotion
+detected_emotion = runner()
+
+# Check if the generated emoji matches the detected emotion
+if eg.emoji_map[detected_emotion] == random_emoji:
+    print("Fully authenticated - Thank you!")
+else:
+    insult = get_insult()
+    print(insult)
