@@ -139,3 +139,5 @@ dmypy.json
 /images
 */images
 */*/images
+emoji-venv/.DS_Store
+.DS_Store
