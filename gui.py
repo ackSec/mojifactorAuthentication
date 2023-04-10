@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import authenticateFace as af
 import common.emojiGenerator as eg
 from modules.frameCapture import runner
@@ -15,8 +16,14 @@ def get_insult():
 
 
 def run_authenticate():
-    af.runner()
+    result = af.runner()
+    if result:
+        authenticate_status_label.config(text="Authentication successful.")
+    else:
+        authenticate_status_label.config(text="Authentication failed. Please try again.")
     generate_emoji_button.config(state="normal")
+    authenticate_button.config(fg="white")
+
 
 
 def run_generate_emoji():
@@ -24,36 +31,61 @@ def run_generate_emoji():
     random_emoji = eg.generate_random_emoji()
     emoji_label.config(text=f"Please make this face to authenticate yourself: {random_emoji}")
     detect_emotion_button.config(state="normal")
+    generate_emoji_button.config(fg="white")
 
 
 def run_detect_emotion():
     detected_emotion = runner()
-    if eg.emoji_map[detected_emotion] == random_emoji:
+    if detected_emotion is None:
+        messagebox.showerror("Error", "No face detected, please try again")
+    elif eg.emoji_map[detected_emotion] == random_emoji:
         status_label.config(text="Fully authenticated - Thank you!")
+        detect_emotion_button.config(fg="black")
     else:
         insult = get_insult()
         status_label.config(text=insult)
+        detect_emotion_button.config(fg="black")
 
 # Create the main window
 window = tk.Tk()
 window.title("Mojifactor Authentication")
-window.geometry("500x300")
+window.geometry("500x400")
 window.resizable(False, False)
 
+# Set window position
+window.eval('tk::PlaceWindow %s center' % window.winfo_pathname(window.winfo_id()))
+
+# Set dark mode theme
+window.tk_setPalette(background='#2c2c2c', foreground='white', activeBackground='#0078d7', activeForeground='white')
+
+# Create the frames
+authenticate_frame = tk.Frame(window)
+generate_emoji_frame = tk.Frame(window)
+detect_emotion_frame = tk.Frame(window)
+
 # Create the widgets
-authenticate_button = tk.Button(window, text="Authenticate", command=run_authenticate)
-generate_emoji_button = tk.Button(window, text="Generate Emoji", command=run_generate_emoji, state="disabled")
-detect_emotion_button = tk.Button(window, text="Detect Emotion", command=run_detect_emotion, state="disabled")
+authenticate_button = tk.Button(authenticate_frame, text="Authenticate", command=run_authenticate, height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, fg="black")
+authenticate_status_label = tk.Label(authenticate_frame, text="", font=("Helvetica", 12), fg="white")
 
-emoji_label = tk.Label(window, text="")
-status_label = tk.Label(window, text="")
+generate_emoji_button = tk.Button(generate_emoji_frame, text="Generate Emoji", command=run_generate_emoji, height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, state="disabled", fg="white")
+emoji_label = tk.Label(generate_emoji_frame, text="", font=("Helvetica", 12), fg="white")
 
-# Add the widgets to the window
-authenticate_button.pack(pady=10)
-generate_emoji_button.pack(pady=10)
-detect_emotion_button.pack(pady=10)
-emoji_label.pack(pady=10)
-status_label.pack(pady=10)
+detect_emotion_button = tk.Button(detect_emotion_frame, text="Detect Emotion", command=run_detect_emotion, height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, state="disabled", fg="black")
+status_label = tk.Label(detect_emotion_frame, text="", font=("Helvetica", 12), fg="white")
+
+# Add the widgets to the frames
+authenticate_button.pack()
+authenticate_status_label.pack()
+generate_emoji_button.pack()
+emoji_label.pack()
+detect_emotion_button.pack()
+status_label.pack()
+
+# Add the frames to the window
+authenticate_frame.pack(pady=5)
+generate_emoji_frame.pack(pady=5)
+detect_emotion_frame.pack(pady=5)
 
 # Run the window
 window.mainloop()
+
