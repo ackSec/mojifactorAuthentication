@@ -54,9 +54,6 @@ def runner():
 
     recognized_name = compare_frame_to_images(frame, target_images)
 
-    if recognized_name:
-        print(f"Welcome, {recognized_name}")
-    else:
-        print("Sorry, I don't know you")
-
     video_capture.release()
+    
+    return recognized_name
