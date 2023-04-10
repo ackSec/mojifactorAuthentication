@@ -19,7 +19,7 @@ def runner():
 
     ret, frame = video_capture.read()
 
-    display_countdown(5)
+    #display_countdown(5)
 
     # Capture a frame after the countdown
     ret, frame = video_capture.read()
