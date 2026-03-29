@@ -140,5 +140,12 @@ dmypy.json
 /images
 */images
 */*/images
-emoji-venv/.DS_Store
-.DS_Store
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project-specific
+emoji-venv/
+resting_face_downloaded.jpg

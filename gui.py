@@ -2,28 +2,26 @@ import tkinter as tk
 from tkinter import messagebox
 import authenticateFace as af
 import common.emojiGenerator as eg
+from common.emojiMap import emoji_map
+from common.insult import get_insult
 from modules.frameCapture import runner
-from urllib.request import urlopen
-import time
 
 
-def get_insult():
-    url = "https://evilinsult.com/generate_insult.php"
-    try:
-        response = urlopen(url)
-        return response.read().decode()
-    except Exception as e:
-        return "An error occurred while fetching insult: " + str(e)
+random_emoji = None
 
 
 def run_authenticate():
-    result = af.runner()
+    try:
+        result = af.runner()
+    except RuntimeError as e:
+        authenticate_status_label.config(text=str(e))
+        return
+
     if result:
-        authenticate_status_label.config(text="Authentication successful.")
+        authenticate_status_label.config(text=f"Welcome, {result}!")
+        generate_emoji_button.config(state="normal")
     else:
-        authenticate_status_label.config(text="Authentication failed. Please try again.")
-    generate_emoji_button.config(state="normal")
-    authenticate_button.config(fg="white")
+        authenticate_status_label.config(text="Face not recognized. Please try again.")
 
 
 def run_generate_emoji():
@@ -31,7 +29,6 @@ def run_generate_emoji():
     random_emoji = eg.generate_random_emoji()
     emoji_label.config(text=f"Please make this face to authenticate yourself: {random_emoji}")
     detect_emotion_button.config(state="normal")
-    generate_emoji_button.config(fg="white")
 
 
 def update_countdown_label(countdown):
@@ -43,25 +40,29 @@ def update_countdown_label(countdown):
 
 
 def run_detect_emotion():
-    countdown_duration = 5  # set the duration of the countdown in seconds
+    countdown_duration = 5
     update_countdown_label(countdown_duration)
 
 
 def run_detect_emotion_after_countdown():
-    detected_emotion = runner()
+    try:
+        detected_emotion = runner()
+    except RuntimeError as e:
+        messagebox.showerror("Error", str(e))
+        return
+
     if detected_emotion is None:
         messagebox.showerror("Error", "No face detected, please try again")
+        return
+
+    corresponding_emoji = emoji_map.get(detected_emotion, "❓")
+    detected_emotion_label.config(text=f"Detected emotion: {detected_emotion} ({corresponding_emoji})")
+
+    if corresponding_emoji == random_emoji:
+        status_label.config(text="Fully authenticated - Thank you!")
     else:
-        corresponding_emoji = eg.emoji_map[detected_emotion]
-        detected_emotion_label.config(text=f"Detected emotion: {detected_emotion} ({corresponding_emoji})")
-        
-        if corresponding_emoji == random_emoji:
-            status_label.config(text="Fully authenticated - Thank you!")
-            detect_emotion_button.config(fg="black")
-        else:
-            insult = get_insult()
-            status_label.config(text=insult)
-            detect_emotion_button.config(fg="black")
+        status_label.config(text=get_insult())
+
 
 # Create the main window
 window = tk.Tk()
@@ -69,11 +70,12 @@ window.title("Mojifactor Authentication")
 window.geometry("500x400")
 window.resizable(False, False)
 
-# Set window position
 window.eval('tk::PlaceWindow %s center' % window.winfo_pathname(window.winfo_id()))
 
-# Set dark mode theme
-window.tk_setPalette(background='#2c2c2c', foreground='white', activeBackground='#0078d7', activeForeground='white')
+window.tk_setPalette(
+    background='#2c2c2c', foreground='white',
+    activeBackground='#0078d7', activeForeground='white'
+)
 
 # Create the frames
 authenticate_frame = tk.Frame(window)
@@ -81,17 +83,26 @@ generate_emoji_frame = tk.Frame(window)
 detect_emotion_frame = tk.Frame(window)
 
 # Create the widgets
-authenticate_button = tk.Button(authenticate_frame, text="Authenticate", command=run_authenticate, height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, fg="black")
-authenticate_status_label = tk.Label(authenticate_frame, text="", font=("Helvetica", 12), fg="white")
+authenticate_button = tk.Button(
+    authenticate_frame, text="Authenticate", command=run_authenticate,
+    height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0
+)
+authenticate_status_label = tk.Label(authenticate_frame, text="", font=("Helvetica", 12))
 
-generate_emoji_button = tk.Button(generate_emoji_frame, text="Generate Emoji", command=run_generate_emoji, height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, state="disabled", fg="white")
-emoji_label = tk.Label(generate_emoji_frame, text="", font=("Helvetica", 12), fg="white")
+generate_emoji_button = tk.Button(
+    generate_emoji_frame, text="Generate Emoji", command=run_generate_emoji,
+    height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, state="disabled"
+)
+emoji_label = tk.Label(generate_emoji_frame, text="", font=("Helvetica", 12))
 
-detect_emotion_button = tk.Button(detect_emotion_frame, text="Detect Emotion", command=run_detect_emotion, height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, state="disabled", fg="black")
-detected_emotion_label = tk.Label(detect_emotion_frame, text="", font=("Helvetica", 12), fg="white")
-status_label = tk.Label(detect_emotion_frame, text="", font=("Helvetica", 12), fg="white")
+detect_emotion_button = tk.Button(
+    detect_emotion_frame, text="Detect Emotion", command=run_detect_emotion,
+    height=2, width=15, font=("Helvetica", 14), bd=0, highlightthickness=0, state="disabled"
+)
+detected_emotion_label = tk.Label(detect_emotion_frame, text="", font=("Helvetica", 12))
+status_label = tk.Label(detect_emotion_frame, text="", font=("Helvetica", 12))
 
-# Add the widgets to the frames
+# Pack widgets into frames
 authenticate_button.pack()
 authenticate_status_label.pack()
 generate_emoji_button.pack()
@@ -100,11 +111,9 @@ detect_emotion_button.pack()
 detected_emotion_label.pack()
 status_label.pack()
 
-# Add the frames to the window
+# Pack frames into window
 authenticate_frame.pack(pady=5)
 generate_emoji_frame.pack(pady=5)
 detect_emotion_frame.pack(pady=5)
 
-# Run the window
 window.mainloop()
-

@@ -2,6 +2,21 @@ provider "aws" {
   region = "us-east-1"
 }
 
+variable "aws_account_id" {
+  description = "AWS account ID"
+  type        = string
+}
+
+variable "s3_bucket_arn" {
+  description = "ARN of the S3 bucket for Rekognition output"
+  type        = string
+}
+
+variable "kinesis_video_stream_arn" {
+  description = "ARN of the Kinesis Video Stream"
+  type        = string
+}
+
 resource "aws_iam_role" "rekognition_processor_role" {
   name = "rekognition-processor-role"
   assume_role_policy = jsonencode({
@@ -19,29 +34,6 @@ resource "aws_iam_role" "rekognition_processor_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "rekognition_processor_policy_attachment" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonRekognitionReadOnlyAccess"
+  policy_arn = "arn:aws:iam::${var.aws_account_id}:policy/AmazonRekognitionReadOnlyAccess"
   role       = aws_iam_role.rekognition_processor_role.name
-}
-
-resource "aws_kinesis_video_stream_processor" "example_processor" {
-  name = "example-processor"
-  kinesis_video_stream_arn = aws_kinesis_video_stream.example_stream.arn
-  role_arn = aws_iam_role.rekognition_processor_role.arn
-  input {
-    kinesis_video_stream {
-      arn = aws_kinesis_video_stream.example_stream.arn
-    }
-  }
-  output {
-    s3 {
-      bucket_arn = "arn:aws:s3:::example-bucket"
-      role_arn   = aws_iam_role.rekognition_processor_role.arn
-    }
-  }
-  processing_configuration {
-    face_detection {
-      face_detection_model_version = "2.0"
-      face_search_threshold        = 90
-    }
-  }
 }

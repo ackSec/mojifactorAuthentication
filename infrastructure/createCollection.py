@@ -1,29 +1,32 @@
-# this is if we want to train more images into rekognition
-# this was my training code
+# Training script: indexes faces from the FER2013 dataset into a Rekognition collection.
+# FER2013 contains 48x48 grayscale pixel arrays, which must be converted to
+# PNG before sending to Rekognition (it requires encoded image bytes, not raw pixels).
 
 import boto3
 import csv
+import io
+from PIL import Image
 
-# Create a Rekognition client
 rekognition = boto3.client('rekognition')
 
-# Read the FER2013 dataset CSV file
+COLLECTION_ID = 'my-collection'
+
 with open('fer2013.csv', 'r') as f:
     reader = csv.reader(f)
-    next(reader)  # skip the header row
+    next(reader)  # skip header
     for row in reader:
-        # Parse the image data and label from the row
         pixels = [int(p) for p in row[1].split()]
         label = row[0]
 
-        # Convert the pixel values to bytes
-        bytes_data = bytearray(pixels)
+        # Convert raw pixels to a 48x48 grayscale image, then encode as PNG
+        img = Image.new('L', (48, 48))
+        img.putdata(pixels)
+        buffer = io.BytesIO()
+        img.save(buffer, format='PNG')
+        image_bytes = buffer.getvalue()
 
-        # Add the face to the Rekognition collection with the label as the external ID
         rekognition.index_faces(
-            CollectionId='my-collection',
-            Image={
-                'Bytes': bytes_data
-            },
+            CollectionId=COLLECTION_ID,
+            Image={'Bytes': image_bytes},
             ExternalImageId=label
         )
