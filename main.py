@@ -1,29 +1,24 @@
 import authenticateFace as af
 import common.emojiGenerator as eg
+from common.emojiMap import emoji_map
+from common.insult import get_insult
 from modules.frameCapture import runner
-from urllib.request import urlopen
 
-def get_insult():
-    url = "https://evilinsult.com/generate_insult.php"
-    try:
-        response = urlopen(url)
-        return response.read().decode()
-    except Exception as e:
-        return "An error occurred while fetching insult: " + str(e)
+# Factor 1: Authenticate the user by face recognition
+recognized = af.runner()
+if recognized is None:
+    print("Face not recognized. Authentication failed.")
+    exit(1)
 
-# Authenticate the user
-af.runner()
+print(f"Welcome, {recognized}!")
 
-# Generate a random emoji
+# Factor 2: Emoji challenge
 random_emoji = eg.generate_random_emoji()
 print(f"Please make this face to authenticate yourself: {random_emoji}")
 
-# Detect the user's emotion
 detected_emotion = runner()
 
-# Check if the generated emoji matches the detected emotion
-if eg.emoji_map[detected_emotion] == random_emoji:
+if detected_emotion is not None and emoji_map.get(detected_emotion) == random_emoji:
     print("Fully authenticated - Thank you!")
 else:
-    insult = get_insult()
-    print(insult)
+    print(get_insult())
